@@ -39,3 +39,9 @@ class OBDInterface:
         #     if speed != self.current_speed:
         #         self.current_speed = speed
         #         self.message_sender.send_message("broadcast", "Speed changed to {}".format(speed))
+    
+    def get_rpm(self):
+        return self.connection.query(obd.commands.RPM).value
+
+    def get_speed(self):
+        return self.connection.query(obd.commands.SPEED).value

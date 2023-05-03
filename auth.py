@@ -5,19 +5,18 @@
 
 def is_authenticated():
     try:
-        f = open("creds.txt", "r")
-        return len(f.read()) > 0
+        with open("creds.txt", "r") as f:
+            return len(f.read()) > 0
     except:
         return False
 
 def get_creds():
     try:
-        f = open("creds.txt", "r")
-        return f.read()
+        with open("creds.txt", "r") as f:
+            return f.read()
     except FileNotFoundError:
         return ""
 
 def set_creds(value):
-    f = open("creds.txt", "w")
-    f.write(value)
-    f.close()
+    with open("creds.txt", "w") as f:
+        f.write(value)

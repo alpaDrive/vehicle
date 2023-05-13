@@ -4,12 +4,14 @@
 '''
 
 import asyncio, json, websockets, configs
+from monitor import OBDInterface
 
 class Middleware:
     def __init__(self, vehicle_id):
         self.vehicle_id = vehicle_id
         self.ws = None
         self.ready_event = asyncio.Event()
+        self.obd_interface = None
 
     async def connect(self):
         self.ws = await websockets.connect(
@@ -21,7 +23,12 @@ class Middleware:
         # Keep the connection alive by sending a heartbeat every 30 seconds
         while True:
             await self.heartbeat()
-            await asyncio.sleep(30)
+            await self.handle_messages()
+            await asyncio.sleep(5)
+
+    async def heartbeat(self):
+        # Send a heartbeat message to the server
+        await self.ws.ping()
 
     async def send_message(self, mode, message, conn_id="", status="success", attachments=[]):
         # Create message in standard format
@@ -35,13 +42,24 @@ class Middleware:
         }
 
         await self.ws.send(json.dumps(msg))
-    
-    async def heartbeat(self):
-        await self.ws.ping()
+
+    async def handle_messages(self):
+        async for message in self.ws:
+            self.on_message(self.ws, message)
 
     def on_message(self, ws, message):
-        # Handle incoming messages here
-        pass
+        data = json.loads(message)
+
+        # If server requests for OBD data, get the values and send them
+        if data.get('mode') == 'get_obd_data':
+            if self.obd_interface:
+                obd_data = {
+                    "rpm": self.obd_interface.get_rpm(),
+                    "speed": self.obd_interface.get_speed()
+                }
+                asyncio.create_task(self.send_message("response", obd_data, conn_id=data.get("conn_id")))
+            else:
+                asyncio.create_task(self.send_message("error", "OBD data not available"))
 
     def on_error(self, ws, error):
         # Handle errors here
@@ -53,3 +71,4 @@ class Middleware:
 
     def on_open(self, ws):
         print("Created room")
+        self.obd_interface = OBDInterface(self.vehicle_id, self)

@@ -4,8 +4,8 @@ from monitor import OBDInterface
 
 def register():
     payload = {
-        "company": "test",
-        "model": "test"
+        "company": "default",
+        "model": "default"
     }
 
     response = requests.post(f'{configs.PROTOCOLS.get("http")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
@@ -26,14 +26,11 @@ async def main():
     # Wait for the middleware to connect to the WebSocket before starting the data monitor
     await middleware.ready_event.wait()
 
-    asyncio.create_task(data_monitor.start())
-
-    # Keep the event loop running to receive messages and send heartbeats
-    while True:
-        await middleware.heartbeat()
-        await asyncio.sleep(5)
-
-
+    # Run the middleware and data monitor concurrently
+    await asyncio.gather(
+        middleware.run(),
+        data_monitor.start()
+    )
 
 if __name__ == '__main__':
     asyncio.run(main())

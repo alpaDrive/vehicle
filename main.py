@@ -4,8 +4,8 @@ from monitor import OBDInterface
 
 def register():
     payload = {
-        "company": "test",
-        "model": "test"
+        "company": "default",
+        "model": "default"
     }
 
     response = requests.post(f'{configs.PROTOCOLS.get("http")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))

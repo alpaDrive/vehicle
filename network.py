@@ -37,7 +37,7 @@ class Middleware:
             "vid": self.vehicle_id,
             "conn_id": conn_id,
             "status": status,
-            "message": str(message),
+            "message": message,
             "attachments": attachments
         }
 

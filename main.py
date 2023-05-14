@@ -8,7 +8,7 @@ def register():
         "model": "default"
     }
 
-    response = requests.post(f'{configs.PROTOCOLS.get("http")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
+    response = requests.post(f'{configs.PROTOCOLS.get("https")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
     auth.set_creds(json.loads(response.content)["id"]["$oid"])
 
 async def main():

@@ -1,10 +1,21 @@
-import obd
+import obd, serial, pynmea2
+
+class GPS:
+    def __init__(self):
+        self.connection = serial.Serial("/dev/ttyS0")
+
+    def position(self):
+        line = self.connection.readline().decode('latin-1')
+        if line.startswith('$GPGGA'):
+            data = pynmea2.parse(line)
+            return (data.latitude, data.longitude)
 
 class OBDInterface:
     def __init__(self, vehicle_id, message_sender):
         self.vehicle_id = vehicle_id
         self.message_sender = message_sender
         self.connection = obd.OBD('/dev/ttyUSB0')
+        self.gps = GPS()
         self.stats = {
             speed: None,
             rpm: None,
@@ -32,7 +43,8 @@ class OBDInterface:
                 rpm: rpm,
                 temp: temperature,
                 odo: odo,
-                gear: gear
+                gear: gear,
+                location: gps.position()
                 stressed: self.is_vehicle_under_stress(rpm, speed, gear)
             }
 

@@ -7,8 +7,7 @@ class GPS:
     def position(self):
         line = self.connection.readline().decode('latin-1')
         if line.startswith('$GPGGA'):
-            data = pynmea2.parse(line)
-            return (data.latitude, data.longitude)
+            return pynmea2.parse(line)
 
 class OBDInterface:
     def __init__(self, vehicle_id, message_sender):
@@ -37,6 +36,7 @@ class OBDInterface:
             temperature = self.parse_response(self.connection.query(obd.commands.COOLANT_TEMP).value)
             odo = self.parse_response(self.connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value)
             gear = self.estimate_gear_position(rpm, speed)
+            location = gps.position()
 
             self.stats = {
                 speed: speed,
@@ -44,7 +44,10 @@ class OBDInterface:
                 temp: temperature,
                 odo: odo,
                 gear: gear,
-                location: gps.position()
+                location: {
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                }
                 stressed: self.is_vehicle_under_stress(rpm, speed, gear)
             }
 
@@ -70,7 +73,6 @@ class OBDInterface:
 
         # If none of the above conditions are met, return False
         return False
-
 
     def estimate_gear_position(self, engine_rpm, speedometer_reading):
         # Set up the gear ratios for the 2015 Maruti Suzuki Swift Dzire

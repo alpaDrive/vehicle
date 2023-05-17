@@ -5,9 +5,12 @@ class GPS:
         self.connection = serial.Serial("/dev/ttyS0")
 
     def position(self):
-        line = self.connection.readline().decode('latin-1')
-        if line.startswith('$GPGGA'):
-            return pynmea2.parse(line)
+        try:
+            line = self.connection.readline().decode('latin-1')
+            if line.startswith('$GPGGA'):
+                return pynmea2.parse(line)
+        except:
+            return { "latitude": 0.0, "longitude": 0.0 }
 
 class OBDInterface:
     def __init__(self, vehicle_id, message_sender):

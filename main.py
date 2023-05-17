@@ -28,7 +28,7 @@ async def main():
 
     # Run the middleware and data monitor concurrently
     await asyncio.gather(
-        middleware.run(),
+        # middleware.run(),
         data_monitor.start()
     )
 

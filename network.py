@@ -15,7 +15,7 @@ class Middleware:
 
     async def connect(self):
         self.ws = await websockets.connect(
-            f'{configs.PROTOCOLS.get("ws")}{configs.SERVER_URL}/join/vehicle/{self.vehicle_id}'
+            f'{configs.PROTOCOLS.get("wss")}{configs.SERVER_URL}/join/vehicle/{self.vehicle_id}'
         )
         self.on_open(self.ws)
         self.ready_event.set()
@@ -41,11 +41,12 @@ class Middleware:
             "attachments": attachments
         }
 
-        await self.ws.send(json.dumps(msg))
+        await self.ws.send(str(json.dumps(msg)))
 
     async def handle_messages(self):
         async for message in self.ws:
-            self.on_message(self.ws, message)
+            print('A message was recieved')
+            print(message)
 
     def on_message(self, ws, message):
         data = json.loads(message)
@@ -71,4 +72,3 @@ class Middleware:
 
     def on_open(self, ws):
         print("Created room")
-        self.obd_interface = OBDInterface(self.vehicle_id, self)

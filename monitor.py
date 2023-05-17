@@ -2,15 +2,16 @@ import obd, serial, pynmea2, json
 
 class GPS:
     def __init__(self):
-        self.connection = serial.Serial("/dev/ttyS0")
+        pass
+        # self.connection = serial.Serial("/dev/ttyS0")
 
     def position(self):
-        try:
-            line = self.connection.readline().decode('latin-1')
-            if line.startswith('$GPGGA'):
-                return pynmea2.parse(line)
-        except:
-            return { "latitude": 0.0, "longitude": 0.0 }
+        # try:
+        #     line = self.connection.readline().decode('latin-1')
+        #     if line.startswith('$GPGGA'):
+        #         return pynmea2.parse(line)
+        # except:
+        return { "latitude": 0.0, "longitude": 0.0 }
 
 class OBDInterface:
     def __init__(self, vehicle_id, message_sender):
@@ -19,10 +20,15 @@ class OBDInterface:
         self.connection = obd.OBD('/dev/ttyUSB0')
         self.gps = GPS()
         self.stats = {
-            "speed": None,
-            "rpm": None,
-            "temp": None,
+            "speed": 0,
+            "rpm": 0,
+            "temp": 0,
             "gear": 0,
+            "location": {
+                    "latitude": 0.0,
+                    "longitude": 0.0
+                },
+            "odo": 0,
             "stressed": False
         }
 
@@ -34,7 +40,7 @@ class OBDInterface:
             speed = self.parse_response(self.connection.query(obd.commands.SPEED).value)
             temperature = self.parse_response(self.connection.query(obd.commands.COOLANT_TEMP).value)
             odo = self.parse_response(self.connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value)
-            gear = self.estimate_gear_position(rpm, speed)
+            # gear = self.estimate_gear_position(rpm, speed)
             location = self.gps.position()
 
             self.stats = {
@@ -42,15 +48,15 @@ class OBDInterface:
                 "rpm": rpm,
                 "temp": temperature,
                 "odo": odo,
-                "gear": gear,
+                "gear": 0,
                 "location": {
                     "latitude": location.latitude,
                     "longitude": location.longitude
                 },
-                "stressed": self.is_vehicle_under_stress(rpm, speed, gear)
+                "stressed": self.is_vehicle_under_stress(rpm, speed, 0)
             }
 
-            self.message_sender.send_message(json.dumps(self.stats))
+            await self.message_sender.send_message("broadcast", self.stats)
     
     def parse_response(self, response):
         return float(str(response).split(" ")[0])
@@ -73,7 +79,7 @@ class OBDInterface:
         # If none of the above conditions are met, return False
         return False
 
-    def estimate_gear_position(self, engine_rpm, speedometer_reading):
+    def estimate_gear_position(engine_rpm, speedometer_reading):
         # Set up the gear ratios for the 2015 Maruti Suzuki Swift Dzire
         gear_ratios = {
             '1st gear': 3.545,
@@ -82,6 +88,10 @@ class OBDInterface:
             '4th gear': 0.911,
             '5th gear': 0.725
         }
+        
+        # Check if speedometer reading is zero
+        if speedometer_reading <= 0:
+            return 0  # Return 0 to indicate neutral gear
         
         # Calculate the ratio of engine RPM to speedometer reading
         ratio = engine_rpm / speedometer_reading

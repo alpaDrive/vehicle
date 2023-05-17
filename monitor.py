@@ -1,4 +1,4 @@
-import obd, serial, pynmea2
+import obd, serial, pynmea2, json
 
 class GPS:
     def __init__(self):
@@ -19,18 +19,14 @@ class OBDInterface:
         self.connection = obd.OBD('/dev/ttyUSB0')
         self.gps = GPS()
         self.stats = {
-            speed: None,
-            rpm: None,
-            temp: None,
-            gear: 0,
-            stressed: False
+            "speed": None,
+            "rpm": None,
+            "temp": None,
+            "gear": 0,
+            "stressed": False
         }
 
     async def start(self):
-        # Start continuous monitoring of values
-        self.connection.watch(obd.commands.RPM)
-        self.connection.watch(obd.commands.SPEED)
-        self.connection.start()
 
         while True:
             # Get current values
@@ -39,19 +35,19 @@ class OBDInterface:
             temperature = self.parse_response(self.connection.query(obd.commands.COOLANT_TEMP).value)
             odo = self.parse_response(self.connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value)
             gear = self.estimate_gear_position(rpm, speed)
-            location = gps.position()
+            location = self.gps.position()
 
             self.stats = {
-                speed: speed,
-                rpm: rpm,
-                temp: temperature,
-                odo: odo,
-                gear: gear,
-                location: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                }
-                stressed: self.is_vehicle_under_stress(rpm, speed, gear)
+                "speed": speed,
+                "rpm": rpm,
+                "temp": temperature,
+                "odo": odo,
+                "gear": gear,
+                "location": {
+                    "latitude": location.latitude,
+                    "longitude": location.longitude
+                },
+                "stressed": self.is_vehicle_under_stress(rpm, speed, gear)
             }
 
             self.message_sender.send_message(json.dumps(self.stats))

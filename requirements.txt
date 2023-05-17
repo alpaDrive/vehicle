@@ -2,3 +2,4 @@ obd
 requests
 json
 asyncio
+pynmea2

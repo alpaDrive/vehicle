@@ -1,6 +1,8 @@
-import auth, requests, configs, json, asyncio
-from network import Middleware
-from monitor import OBDInterface
+import asyncio, websockets, requests, json, obd, urllib
+from utils import auth, configs, vehicle
+
+connection = obd.OBD('/dev/ttyUSB0')
+serial = serial.Serial('/dev/ttyS0')
 
 def register():
     payload = {
@@ -8,29 +10,31 @@ def register():
         "model": "default"
     }
 
-    response = requests.post(f'{configs.PROTOCOLS.get("http")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
+    response = requests.post(f'{configs.PROTOCOLS.get("https")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
     auth.set_creds(json.loads(response.content)["id"]["$oid"])
 
-async def main():
+def get_message(message, vid, mode='broadcast', conn_id="", status="success", attachments=[]):
+        # Create message in standard format
+        return {
+            "mode": mode,
+            "vid": vid,
+            "conn_id": conn_id,
+            "status": status,
+            "message": message,
+            "attachments": attachments
+        }
+
+async def send_messages():
     if not auth.is_authenticated():
         register()
 
-    creds = auth.get_creds()
-    middleware = Middleware(creds)
+    vehicle_id = auth.get_creds()
+    uri = f'{configs.PROTOCOLS.get("wss")}{configs.SERVER_URL}/join/vehicle/{vehicle_id}'
 
-    # Create a task to connect the middleware to the WebSocket in the background
-    connection_task = asyncio.create_task(middleware.connect())
+    async with websockets.connect(uri) as websocket:
+        while True:
+            stats = vehicle.get_stats(connection, serial)
+            await websocket.send(json.dumps(get_message(stats, vehicle_id)))
+            await asyncio.sleep(1)
 
-    data_monitor = OBDInterface(creds, middleware)
-
-    # Wait for the middleware to connect to the WebSocket before starting the data monitor
-    await middleware.ready_event.wait()
-
-    # Run the middleware and data monitor concurrently
-    await asyncio.gather(
-        middleware.run(),
-        data_monitor.start()
-    )
-
-if __name__ == '__main__':
-    asyncio.run(main())
+asyncio.run(send_messages())

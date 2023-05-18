@@ -1,8 +1,13 @@
-import asyncio, websockets, requests, json, obd, urllib
+import asyncio, websockets, requests, json, obd, urllib, serial, os
+import RPi.GPIO as GPIO
 from utils import auth, configs, vehicle
 
 connection = obd.OBD('/dev/ttyUSB0')
 serial = serial.Serial('/dev/ttyS0')
+
+GPIO.setmode(GPIO.BCM)
+button_pin = 21
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 def register():
     payload = {
@@ -33,6 +38,10 @@ async def send_messages():
 
     async with websockets.connect(uri) as websocket:
         while True:
+            if GPIO.input(button_pin) == GPIO.LOW:
+                GPIO.cleanup()
+                os.system("sudo shutdown -h now")
+                quit()
             stats = vehicle.get_stats(connection, serial)
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
             await asyncio.sleep(1)

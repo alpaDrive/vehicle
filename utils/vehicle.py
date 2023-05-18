@@ -1,4 +1,5 @@
-import obd, gps
+import obd
+from utils import gps
 
 def get_stats(connection, serial):
     try:
@@ -17,8 +18,8 @@ def get_stats(connection, serial):
         "odo": odo,
         "gear": 0,
         "location": {
-            "latitude": 0.0,
-            "longitude": 0.0
+            "latitude": 0.0 if location is None else location['latitude'],
+            "longitude": 0.0 if location is None else location['longitude']
         },
         "stressed": False
     }

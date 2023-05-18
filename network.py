@@ -23,7 +23,7 @@ class Middleware:
         # Keep the connection alive by sending a heartbeat every 30 seconds
         while True:
             await self.heartbeat()
-            await self.handle_messages()
+            # await self.handle_messages()
             await asyncio.sleep(5)
 
     async def heartbeat(self):
@@ -41,7 +41,10 @@ class Middleware:
             "attachments": attachments
         }
 
-        await self.ws.send(str(json.dumps(msg)))
+        try:
+            await self.ws.send(json.dumps(msg))
+        except Exception as e:
+            print("An exception occurred during send_message:", str(e))
 
     async def handle_messages(self):
         async for message in self.ws:
@@ -64,11 +67,11 @@ class Middleware:
 
     def on_error(self, ws, error):
         # Handle errors here
-        print(error)
+        print("An error occured", error)
 
     def on_close(self, ws):
         # Handle closing of websocket here
-        pass
+        print("Connection closed")
 
     def on_open(self, ws):
         print("Created room")

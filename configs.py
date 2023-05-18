@@ -8,4 +8,4 @@ PROTOCOLS = {
     'ws': 'ws',
     'wss': 'wss'
 }
-SERVER_URL = '://alpadrive.selseus.com'
+SERVER_URL = '://adc1-116-68-86-24.ngrok-free.app'

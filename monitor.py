@@ -36,10 +36,10 @@ class OBDInterface:
 
         while True:
             # Get current values
-            rpm = self.parse_response(self.connection.query(obd.commands.RPM).value) # try with .magnitude
-            speed = self.parse_response(self.connection.query(obd.commands.SPEED).value)
-            temperature = self.parse_response(self.connection.query(obd.commands.COOLANT_TEMP).value)
-            odo = self.parse_response(self.connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value)
+            rpm = int(self.connection.query(obd.commands.RPM).value.magnitude) # try with .magnitude
+            speed = int(self.connection.query(obd.commands.SPEED).value.magnitude)
+            temperature = int(self.connection.query(obd.commands.COOLANT_TEMP).value.magnitude)
+            odo = int(self.connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value.magnitude)
             # gear = self.estimate_gear_position(rpm, speed)
             location = self.gps.position()
 
@@ -50,8 +50,8 @@ class OBDInterface:
                 "odo": odo,
                 "gear": 0,
                 "location": {
-                    "latitude": location.latitude,
-                    "longitude": location.longitude
+                    "latitude": location['latitude'],
+                    "longitude": location['longitude']
                 },
                 "stressed": self.is_vehicle_under_stress(rpm, speed, 0)
             }

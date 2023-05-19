@@ -1,10 +1,13 @@
-import pynmea2
+import pynmea2, serial
 
-default = { 'latitude': 0.0, 'longitude': 0.0 }
-def position(serial):
+def position():
     try:
-        line = serial.readline().decode('latin-1')  # Read a line of NMEA data and decode it
-        if line.startswith('$GPGGA'):  # Example: Use GGA sentence for latitude and longitude
-            return pynmea2.parse(line)
+        connection = serial.Serial('/dev/ttyS0')
+        while True:
+            line = connection.readline().decode('latin-1')  # Read a line of NMEA data and decode it
+            if line.startswith('$GPGGA'):  # Example: Use GGA sentence for latitude and longitude
+                connection.close()
+                data = pynmea2.parse(line)
+                return { 'latitude': data.latitude, 'longitude': data.longitude } 
     except:
-        return default
+        return { 'latitude': 0.0, 'longitude': 0.0 }

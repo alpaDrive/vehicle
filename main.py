@@ -1,9 +1,9 @@
 import asyncio, websockets, requests, json, obd, urllib, serial, os
 import RPi.GPIO as GPIO
 from utils import auth, configs, vehicle
+from datetime import datetime
 
 connection = obd.OBD('/dev/ttyUSB0')
-serial = serial.Serial('/dev/ttyS0')
 
 GPIO.setmode(GPIO.BCM)
 button_pin = 21
@@ -35,15 +35,21 @@ async def send_messages():
 
     vehicle_id = auth.get_creds()
     uri = f'{configs.PROTOCOLS.get("wss")}{configs.SERVER_URL}/join/vehicle/{vehicle_id}'
+    print('Trying to connect...')
 
     async with websockets.connect(uri) as websocket:
+        print('Connected to server!')
         while True:
             if GPIO.input(button_pin) == GPIO.LOW:
                 GPIO.cleanup()
                 os.system("sudo shutdown -h now")
                 quit()
-            stats = vehicle.get_stats(connection, serial)
+            stats = vehicle.get_stats(connection)
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
 
-asyncio.run(send_messages())
+while True:
+    try:
+        asyncio.run(send_messages())
+    except:
+        print(f'Lost connection with server at {datetime.now().strftime("%H:%M:%S")}')

@@ -1,7 +1,7 @@
 import asyncio, websockets, requests, json, obd, urllib, serial, os
 import RPi.GPIO as GPIO
-from utils import auth, configs, vehicle
-from datetime import datetime
+from utils import auth, configs, vehicle, gps
+from datetime import datetime, timedelta
 
 connection = obd.OBD('/dev/ttyUSB0')
 
@@ -38,7 +38,7 @@ async def send_messages():
     print('Trying to connect...')
 
     async with websockets.connect(uri) as websocket:
-        print('Connected to server!')
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Connected to server!')
         while True:
             if GPIO.input(button_pin) == GPIO.LOW:
                 GPIO.cleanup()
@@ -48,8 +48,18 @@ async def send_messages():
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
             await asyncio.sleep(0.2)
 
+# wait 2 minutes for GPS fix
+end_time = datetime.now() + timedelta(minutes=2)
+print(f'{datetime.now().strftime("%H:%M:%S")}: Wating for GPS signal...')
+while datetime.now() < end_time :
+    if gps.has_fix():
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Got GPS fix!')
+        break
+
 while True:
     try:
         asyncio.run(send_messages())
+    except KeyboardInterrupt:
+        quit()
     except:
-        print(f'Lost connection with server at {datetime.now().strftime("%H:%M:%S")}')
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Lost connection with server...')

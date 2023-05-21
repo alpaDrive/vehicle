@@ -1,6 +1,6 @@
 import asyncio, websockets, requests, json, obd, urllib, serial, os
 import RPi.GPIO as GPIO
-from utils import auth, configs, vehicle, gps
+from utils import auth, configs, vehicle, gps, banner
 from datetime import datetime, timedelta
 
 connection = obd.OBD('/dev/ttyUSB0')
@@ -48,13 +48,17 @@ async def send_messages():
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
             await asyncio.sleep(0.2)
 
+banner.show()
 # wait 2 minutes for GPS fix
-end_time = datetime.now() + timedelta(minutes=2)
+end_time = datetime.now() + timedelta(minutes=5)
 print(f'{datetime.now().strftime("%H:%M:%S")}: Wating for GPS signal...')
 while datetime.now() < end_time :
     if gps.has_fix():
         print(f'{datetime.now().strftime("%H:%M:%S")}: Got GPS fix!')
         break
+
+if not gps.has_fix():
+    print(f'{datetime.now().strftime("%H:%M:%S")}: GPS signal unavailable at the moment. Starting up system...')
 
 while True:
     try:

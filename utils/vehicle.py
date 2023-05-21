@@ -1,56 +1,79 @@
 import obd
 from utils import gps
 
-def estimate_gear_position(engine_rpm, speedometer_reading):
-    try:
-        # Set up the gear ratios for the 2015 Maruti Suzuki Swift Dzire
-        gear_ratios = {
-            '1st gear': 3.545,
-            '2nd gear': 1.904,
-            '3rd gear': 1.233,
-            '4th gear': 0.911,
-            '5th gear': 0.725
+def predict_gear(speed, rpm):
+    lookup_table = {
+        (0, 10): {
+            (900, 1100): 1,
+            (0, 900): 0
+        },
+        (10, 20): {
+            (1000, 2000): 1,
+            (900, 1000): 2,
+            (0, 900): 0
+        },
+        (20, 30): {
+            (2000, 4000): 1,
+            (1100, 2000): 2,
+            (900, 1100): 3,
+            (0, 900): 0
+        },
+        (30, 40): {
+            (5000, 8000): 1,
+            (2000, 5000): 2,
+            (1200, 2000): 3,
+            (900, 1200): 4,
+            (0, 900): 0
+        },
+        (40, 50): {
+            (5000, 8000): 1,
+            (2500, 5000): 2,
+            (1500, 2500): 3,
+            (1100, 1500): 4,
+            (0, 1000): 0
+        },
+        (50, 60): {
+            (6000, 8000): 1,
+            (4000, 6000): 2,
+            (2500, 4000): 3,
+            (1500, 2500): 4,
+            (1000, 1500): 5,
+            (0, 1000): 0
+        },
+        (60, 80): {
+            (6500, 8000): 1,
+            (5000, 6500): 2,
+            (3500, 5000): 3,
+            (2500, 3500): 4,
+            (1000, 2500): 5,
+            (0, 1000): 0
+        },
+        (80, 100): {
+            (7000, 8000): 1,
+            (6000, 7000): 2,
+            (5000, 6000): 3,
+            (3000, 5000): 4,
+            (1301, 3000): 5,
+            (0, 1300): 0
+        },
+        (100, 121): {
+            (8000, 9000): 1,
+            (6000, 8000): 2,
+            (5000, 6000): 3,
+            (4000, 5000): 4,
+            (1100, 4000): 5,
+            (0, 1100): 0
         }
-        
-        # Check if speedometer reading is zero
-        if speedometer_reading <= 0:
-            return 0  # Return 0 to indicate neutral gear
-        
-        # Calculate the ratio of engine RPM to speedometer reading
-        ratio = engine_rpm / speedometer_reading
-        
-        # Set up the fuzzy logic rules
-        rules = {
-            '1st or 2nd gear': {'min': 0.0, 'max': 0.6},
-            '3rd gear': {'min': 0.6, 'max': 1.1},
-            '4th gear': {'min': 1.1, 'max': 1.4},
-            '5th gear': {'min': 1.4, 'max': 2.0}
-        }
-        
-        # Apply the rules to estimate the gear position
-        gear_position = None
-        for gear, values in rules.items():
-            if values['min'] <= ratio <= values['max']:
-                gear_position = gear
-                break
-        
-        # If no gear position was estimated, use the highest or lowest gear as a fallback
-        if gear_position is None:
-            if ratio < rules['1st or 2nd gear']['min']:
-                gear_position = '1st or 2nd gear'
-            elif ratio > rules['5th gear']['max']:
-                gear_position = '5th gear'
-        
-        # Look up the gear ratio for the estimated gear position
-        if gear_position is not None:
-            for gear, ratio in gear_ratios.items():
-                if gear_position in gear:
-                    return int(gear[0])
-        
-        # If no gear position could be estimated, assume neutral
-        return 0
-    except:
-        return 0
+    }
+
+    # Iterate through the lookup table and find the matching gear for the given RPM and speed
+    for (min_speed, max_speed), rpm_table in lookup_table.items():
+        if speed in range(min_speed, max_speed):
+            for (min_rpm, max_rpm), gear in rpm_table.items():
+                if rpm in range(min_rpm, max_rpm):
+                    return gear
+
+    return 0 # assume neutral if nothing fits
 
 def is_vehicle_under_stress(rpm, speed, gear_position):
     try:
@@ -79,7 +102,7 @@ def get_stats(connection):
         speed = int(connection.query(obd.commands.SPEED).value.magnitude)
         temperature = int(connection.query(obd.commands.COOLANT_TEMP).value.magnitude)
         odo = int(connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value.magnitude)
-        gear = estimate_gear_position(rpm ,speed)
+        gear = predict_gear(speed, rpm)
     except:
         rpm, speed, temperature, odo, gear = 0, 0, 0, 0, 0
     location = gps.position()

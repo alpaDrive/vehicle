@@ -1,6 +1,23 @@
 import obd
 from utils import gps
 
+class Fuel:
+    def __init__(self, fuel):
+        self.fuel = fuel
+        self.odometer = 0
+        self.isReady = False
+    
+    def getReady(self, odometer):
+        self.isReady = True
+        self.odometer = odometer
+
+    def estimate(self, odometer):
+        if self.fuel > 0:
+            if int(odometer - self.odometer) >= 5:
+                self.odometer = odometer
+                self.fuel -= 1
+        return self.fuel
+
 def predict_gear(speed, rpm):
     lookup_table = {
         (0, 10): {
@@ -96,16 +113,22 @@ def is_vehicle_under_stress(rpm, speed, gear_position):
     except:
         return False
 
-def get_stats(connection):
+def get_stat(connection, command):
     try:
-        rpm = int(connection.query(obd.commands.RPM).value.magnitude)
-        speed = int(connection.query(obd.commands.SPEED).value.magnitude)
-        temperature = int(connection.query(obd.commands.COOLANT_TEMP).value.magnitude)
-        odo = int(connection.query(obd.commands.DISTANCE_SINCE_DTC_CLEAR).value.magnitude)
-        gear = predict_gear(speed, rpm)
+        return int(connection.query(command).value.magnitude)
     except:
-        rpm, speed, temperature, odo, gear = 0, 0, 0, 0, 0
+        return 0
+
+def get_stats(connection, fuel):
+    rpm = get_stat(connection, obd.commands.RPM)
+    speed = get_stat(connection, obd.commands.SPEED)
+    temperature = get_stat(connection, obd.commands.COOLANT_TEMP)
+    odo = get_stat(connection, obd.commands.DISTANCE_SINCE_DTC_CLEAR)
+    gear = predict_gear(speed, rpm)
     location = gps.position()
+
+    if not fuel.isReady and odo > 0:
+        fuel.getReady(odo)
 
     return {
         "speed": speed,
@@ -113,9 +136,10 @@ def get_stats(connection):
         "temp": temperature,
         "odo": odo,
         "gear": gear,
+        "fuel": fuel.estimate(odo),
         "location": {
             "latitude": location['latitude'],
             "longitude": location['longitude']
         },
-        "stressed": is_vehicle_under_stress(rpm, speed, gear)
+        "stressed": False
     }

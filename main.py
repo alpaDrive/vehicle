@@ -4,7 +4,7 @@ from utils import auth, configs, vehicle, gps, banner
 from datetime import datetime, timedelta
 
 connection = obd.OBD('/dev/ttyUSB0')
-
+fuel = vehicle.Fuel(50)
 GPIO.setmode(GPIO.BCM)
 button_pin = 21
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -44,13 +44,13 @@ async def send_messages():
                 GPIO.cleanup()
                 os.system("sudo shutdown -h now")
                 quit()
-            stats = vehicle.get_stats(connection)
+            stats = vehicle.get_stats(connection, fuel)
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
             await asyncio.sleep(0.2)
 
 banner.show()
 # wait 2 minutes for GPS fix
-end_time = datetime.now() + timedelta(minutes=5)
+end_time = datetime.now() + timedelta(minutes=2)
 print(f'{datetime.now().strftime("%H:%M:%S")}: Wating for GPS signal...')
 while datetime.now() < end_time :
     if gps.has_fix():

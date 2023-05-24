@@ -1,6 +1,13 @@
-import auth, requests, configs, json, asyncio
-from network import Middleware
-from monitor import OBDInterface
+import asyncio, websockets, requests, json, obd, urllib, serial, os
+import RPi.GPIO as GPIO
+from utils import auth, configs, vehicle, gps, banner
+from datetime import datetime, timedelta
+
+connection = obd.OBD('/dev/ttyUSB0')
+fuel = vehicle.Fuel(50)
+GPIO.setmode(GPIO.BCM)
+button_pin = 21
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 def register():
     payload = {
@@ -8,29 +15,55 @@ def register():
         "model": "default"
     }
 
-    response = requests.post(f'{configs.PROTOCOLS.get("http")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
+    response = requests.post(f'{configs.PROTOCOLS.get("https")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
     auth.set_creds(json.loads(response.content)["id"]["$oid"])
 
-async def main():
+def get_message(message, vid, mode='broadcast', conn_id="", status="success", attachments=[]):
+        # Create message in standard format
+        return {
+            "mode": mode,
+            "vid": vid,
+            "conn_id": conn_id,
+            "status": status,
+            "message": message,
+            "attachments": attachments
+        }
+
+async def send_messages():
     if not auth.is_authenticated():
         register()
 
-    creds = auth.get_creds()
-    middleware = Middleware(creds)
+    vehicle_id = auth.get_creds()
+    uri = f'{configs.PROTOCOLS.get("wss")}{configs.SERVER_URL}/join/vehicle/{vehicle_id}'
+    print('Trying to connect...')
 
-    # Create a task to connect the middleware to the WebSocket in the background
-    connection_task = asyncio.create_task(middleware.connect())
+    async with websockets.connect(uri) as websocket:
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Connected to server!')
+        while True:
+            if GPIO.input(button_pin) == GPIO.LOW:
+                GPIO.cleanup()
+                os.system("sudo shutdown -h now")
+                quit()
+            stats = vehicle.get_stats(connection, fuel)
+            await websocket.send(json.dumps(get_message(stats, vehicle_id)))
+            await asyncio.sleep(0.2)
 
-    data_monitor = OBDInterface(creds, middleware)
+banner.show()
+# wait 2 minutes for GPS fix
+end_time = datetime.now() + timedelta(minutes=2)
+print(f'{datetime.now().strftime("%H:%M:%S")}: Wating for GPS signal...')
+while datetime.now() < end_time :
+    if gps.has_fix():
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Got GPS fix!')
+        break
 
-    # Wait for the middleware to connect to the WebSocket before starting the data monitor
-    await middleware.ready_event.wait()
+if not gps.has_fix():
+    print(f'{datetime.now().strftime("%H:%M:%S")}: GPS signal unavailable at the moment. Starting up system...')
 
-    # Run the middleware and data monitor concurrently
-    await asyncio.gather(
-        middleware.run(),
-        data_monitor.start()
-    )
-
-if __name__ == '__main__':
-    asyncio.run(main())
+while True:
+    try:
+        asyncio.run(send_messages())
+    except KeyboardInterrupt:
+        quit()
+    except:
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Lost connection with server...')

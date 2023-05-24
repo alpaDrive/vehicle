@@ -5,6 +5,7 @@
 PROTOCOLS = {
     'http': 'http',
     'https': 'https',
-    'ws': 'ws'
+    'ws': 'ws',
+    'wss': 'wss'
 }
-SERVER_URL = '://127.0.0.1:7878'
+SERVER_URL = '://alpadrive.selseus.com'

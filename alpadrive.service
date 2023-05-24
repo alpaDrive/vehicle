@@ -1,0 +1,12 @@
+[Unit]
+Description=alpaDrive script
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/alpadrive.sh
+WorkingDirectory=/home/pi/alpaDrive
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

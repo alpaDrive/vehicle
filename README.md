@@ -5,10 +5,10 @@ Software running on Pi, in the vehicle. Written entirely in Python, all the code
 * [What's this](#whats-this)
     * [Role in the UX](#role-in-the-ux)
     * [Tech Stack](#tech-stack)
-* Setup Guide
-    * Hardware prerequisites
-    * Circuit & Connections
-    * Installation Instructions
+* [Setup Guide](#setup-guide)
+    * [Hardware prerequisites](#hardware-prerequisites)
+    * [Connection & Circuits](#connection--circuits)
+    * [Installation Instructions](#installation-instructions)
 
 ## What's this?
 alpaDrive requires some kind of computing platform running in the vehicle to be able to connect with it and monitor it. This platform should ideally work across multiple vehicles as well.

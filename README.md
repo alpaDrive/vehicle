@@ -1,5 +1,7 @@
-# vehicle
-Software running on Pi, in the vehicle. Written entirely in Python, all the code is in a procedural format, easy for anyone to read and understand.
+<img src="https://github.com/alpaDrive/vehicle/assets/50231856/37f2801a-b467-4d9b-93d3-deda828b457e" alt="alpaDrive Logo" width="250" align="right" >
+
+# `vehicle` 🚗
+> Software running on Pi, in the vehicle. Written entirely in Python, all the code is in a procedural format, easy for anyone to read and understand. But beware, you might mess up your car if you change it... Just kidding, welcome aboard & happy hacking! 🎉
 
 ## Table Of Contents
 * [What's this](#whats-this)

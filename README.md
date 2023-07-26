@@ -104,7 +104,7 @@ The first thing that you have to do is to set up and test run the software to se
 
 5. Once this is run, you will get a QR code on your terminal. Scan it from the app after signing up to pair this vehicle to your user account. Make sure you do this once and scan the QR before proceeding to enable auto start on boot. This is because if you accidentally enable auto start on boot, then you'll have to repeat the steps all over again.
 
-If it works, voila! You've set up your Raspberry Pi and are ready to go. If it doesn't, make sure it's an issue with the code before opening an issue but dont feel hesitant to do so. We welcome any issues about the software and will respond immediately.
+If it works, voila! You've set up your Raspberry Pi and are ready to go. If it doesn't, make sure it's an issue with the code before opening an issue but don't feel hesitant to do so. We welcome any issues about the software and will respond immediately.
 
 Before you jump to that, try to debug by using the scripts available in the `__tests__/` directory as well. Also, in order for the script to run smoothly, the OBD adapter must be connected before starting the script.
 
@@ -148,4 +148,4 @@ In a nutshell, you're going to create a systemd service for this software and ru
     $ sudo systemctl status alpadrive.service
     ```
 
-    If it's running successfully, then congrats! You can now open your mobile app, pair using the QR code and view the status of your car!
+    If it's running successfully, then congrats! You can now open your mobile app, pair using the QR code and view the status of your car! You can now disonnect SSH/display & leave the device in your car. Just make sure the power source is stable & doesn't go out. As long as the device stays powered, all features will be available to you. Happy alpaDriving!

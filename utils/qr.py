@@ -6,4 +6,4 @@ def print_qr(data):
     f = io.StringIO()
     qr.print_ascii(out=f)
     f.seek(0)
-    print(f.read())
+    print(f'    {f.read().strip()}')

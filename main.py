@@ -19,13 +19,14 @@ def register():
 
     print("\nRegistering. Please wait...\n")
     response = requests.post(f'{configs.PROTOCOLS.get("https")}{configs.SERVER_URL}/vehicle/register', data=json.dumps(payload))
+    creds = json.loads(response.content)["id"]["$oid"]
     print("\nRegistration successful! Your one time use pairing code is displayed below...\n")
     qr.print_qr(json.dumps({
-        vid: json.loads(response.content)["id"]["$oid"],
+        vid: creds,
         initial: True
     }))
     print("\nOpen the mobile app & scan this QR code to pair. This is a one time use code. If you want to share this vehicle, use the share option in the app instead.")
-    auth.set_creds(json.loads(response.content)["id"]["$oid"])
+    auth.set_creds(creds)
 
 def get_message(message, vid, mode='broadcast', conn_id="", status="success", attachments=[]):
         # Create message in standard format
@@ -64,6 +65,7 @@ if not auth.is_authenticated():
     except KeyboardInterrupt:
         print("Okay, we'll do this later. But remember not to enable 'alpadrive.service' before running this once more!")
     quit()
+    
 # wait 2 minutes for GPS fix
 end_time = datetime.now() + timedelta(minutes=2)
 print(f'{datetime.now().strftime("%H:%M:%S")}: Wating for GPS signal...')

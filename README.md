@@ -52,32 +52,37 @@ Obtain all the following components, test them out individually and confirm they
 
     You can get them in pretty much any electronics store you want these days. If you do want an online link, just click [here](https://robu.in/product/20cm-dupont-wire-color-jumper-cable-2-54mm-1p-1p-female-female-40pcs). Get some male to female & female to female ones, as you'll need them for the push button and GPS module.
 
-6. **A power source**
+6. **Some networking equipment**
+    The Raspberry Pi has to always be connected to a network. We advise you get some hardware that can achieve this. The hardware has to plug in to the RPi, and provide a consistent network connection, even while the car is moving. The best solution is to get some sort of USB SIM card adapter, get a SIM card, purchase a carrier plan & leave it plugged into the RPi.
+
+7. **A power source**
     Looking for a photo here as well? If you don't even know that a power source refers to a phone charger or powerbank, we'd advise you to stop right here because we're sure this isn't your thing 😆 Sorry for that demotivation, let's continue...
 
 ### Connection & Circuits
-A proper circuit diagram is in the works and will be uploaded soon. Meanwhile, you can use these instructions to connect.
-* Connect the ELM327 adapter to one of the USB ports on the Pi
-* Take 4 jumper wires, and make the following connections from the GPS module to the Pi. If you're stuck with the pin numbering scheme on the Pi, just go to [pinout](https://pinout.xyz).
-    
-    | GPS Module  | Raspberry Pi |
-    | ------------- | ------------- |
-    | VCC  | PIN 4 (5V)  |
-    | RX  | PIN 8 (UART TX)  |
-    | TX  | PIN 10 (UART RX) |
-    | GND | PIN 6 (GND) |
- * If you're using the pushbutton, take 2 jumpers, and make the following connections
+Refer to the circuit diagram to make connections. If you need further clarification for the Raspberry Pi's pin layout, refer [pinout](https://pinout.xyz).
+
+<img src="https://github.com/alpaDrive/vehicle/assets/50231856/ff701fab-205d-4973-8deb-bb7dfc7d3584" alt="Circuit Diagram" width="800" align="center" >
+
+| GPS Module  | Raspberry Pi |
+| ------------- | ------------- |
+| VCC  | PIN 4 (5V)  |
+| RX  | PIN 8 (UART TX)  |
+| TX  | PIN 10 (UART RX) |
+| GND | PIN 6 (GND) |
+
+If you're using the pushbutton, here are the connections
   
-    | Pushbutton  | Raspberry Pi |
-    | ----------- | ------------ |
-    |    PIN 1    |    PIN 40    |
-    |    PIN 2    |    PIN 39    |
- * Connect the Pi to a power source after flashing an OS into the SD card
+| Pushbutton  | Raspberry Pi |
+| ----------- | ------------ |
+|    PIN 1    |    PIN 40    |
+|    PIN 2    |    PIN 39    |
+
+Connect the Pi to a power source after flashing an OS into the SD card
 ### Installation Instructions
 If you've got this far, then this might just be a walk in the park. Just follow these instructions step by step to set up your device.
 
 #### Setting up the software
-The first thing that you have to do is to set up and test run the software to see whether it's working or not. 
+The first thing that you have to do is to set up and test run the software to see whether it's working or not. Make sure your Raspberry Pi is connected to the network.
 
 1. Enable serial in the Raspberry Pi by running `sudo raspi-config` on a terminal and enabling the serial interface from the menu
 
@@ -99,21 +104,14 @@ The first thing that you have to do is to set up and test run the software to se
     $ sudo python3 main.py
     ```
 
-5. Once this is run, a new file namely `creds.txt` will be created in the directory containing the vehicle vid. Go to some [online QR code generator](https://www.the-qrcode-generator.com/) and generate a QR code for the following text. Take a printout or sticker print and paste it on your device.
+5. Once this is run, you will get a QR code on your terminal. Scan it from the app after signing up to pair this vehicle to your user account. Make sure you do this once and scan the QR before proceeding to enable auto start on boot. This is because if you accidentally enable auto start on boot, then you'll have to repeat the steps all over again.
 
-    ```json
-    {
-        "vid": "<your vid>",
-        "initial": true
-    }
-    ```
-
-If it works, voila! You've set up your Raspberry Pi and are ready to go. If it doesn't, make sure it's an issue with the code before opening an issue but dont feel hesitant to do so. We welcome any issues about the software and will respond immediately.
+If it works, voila! You've set up your Raspberry Pi and are ready to go. If it doesn't, make sure it's an issue with the code before opening an issue but don't feel hesitant to do so. We welcome any issues about the software and will respond immediately.
 
 Before you jump to that, try to debug by using the scripts available in the `__tests__/` directory as well. Also, in order for the script to run smoothly, the OBD adapter must be connected before starting the script.
 
 #### Enabling auto start on boot
-In a nutshell, you're going to create a systemd service for this software and run it on boot. Here is what you have to do
+In a nutshell, you're going to create a systemd service for this software and run it on boot. One factor to consider here is that the Raspberry Pi should be on some network all the time. The easiest way to do this is to get some USB SIM card adapter & leave it plugged in. Here is what you have to do once you have a consistent networking solution:
 
 1. Copy over the service unit file from this repository to the `/etc/systemd/system/` directory.
 
@@ -152,4 +150,4 @@ In a nutshell, you're going to create a systemd service for this software and ru
     $ sudo systemctl status alpadrive.service
     ```
 
-    If it's running successfully, then congrats! You can now open your mobile app, pair using the QR code and view the status of your car!
+    If it's running successfully, then congrats! You can now open your mobile app, pair using the QR code and view the status of your car! You can now disonnect SSH/display & leave the device in your car. Just make sure the power source is stable & doesn't go out. As long as the device stays powered, all features will be available to you. Happy alpaDriving!

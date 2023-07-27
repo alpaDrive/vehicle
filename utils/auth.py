@@ -1,22 +1,16 @@
 '''
     Module that handles the credential management.
-    We'll be using plaintext in a file until the real credential management is figured out.
+    The vid is simply stored in the OS keychain. This obviously isn't secure as the name & key are constants.
+    This'll stay until we figure out a better way.
 '''
+import keyring
 
 def is_authenticated():
-    try:
-        with open("creds.txt", "r") as f:
-            return len(f.read()) > 0
-    except:
-        return False
+    return keyring.get_password("alpaDrive", "vehicle") is not None
 
 def get_creds():
-    try:
-        with open("creds.txt", "r") as f:
-            return f.read()
-    except FileNotFoundError:
-        return ""
+    creds = keyring.get_password("alpaDrive", "vehicle")
+    return creds if creds is not None else ""
 
 def set_creds(value):
-    with open("creds.txt", "w") as f:
-        f.write(value)
+    keyring.set_password("alpaDrive", "vehicle", value)

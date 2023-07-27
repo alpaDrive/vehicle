@@ -59,23 +59,25 @@ Obtain all the following components, test them out individually and confirm they
     Looking for a photo here as well? If you don't even know that a power source refers to a phone charger or powerbank, we'd advise you to stop right here because we're sure this isn't your thing 😆 Sorry for that demotivation, let's continue...
 
 ### Connection & Circuits
-A proper circuit diagram is in the works and will be uploaded soon. Meanwhile, you can use these instructions to connect.
-* Connect the ELM327 adapter to one of the USB ports on the Pi
-* Take 4 jumper wires, and make the following connections from the GPS module to the Pi. If you're stuck with the pin numbering scheme on the Pi, just go to [pinout](https://pinout.xyz).
-    
-    | GPS Module  | Raspberry Pi |
-    | ------------- | ------------- |
-    | VCC  | PIN 4 (5V)  |
-    | RX  | PIN 8 (UART TX)  |
-    | TX  | PIN 10 (UART RX) |
-    | GND | PIN 6 (GND) |
- * If you're using the pushbutton, take 2 jumpers, and make the following connections
+Refer to the circuit diagram to make connections. If you need further clarification for the Raspberry Pi's pin layout, refer [pinout](https://pinout.xyz).
+
+<img src="https://github.com/alpaDrive/vehicle/assets/50231856/ff701fab-205d-4973-8deb-bb7dfc7d3584" alt="Circuit Diagram" width="800" align="center" >
+
+| GPS Module  | Raspberry Pi |
+| ------------- | ------------- |
+| VCC  | PIN 4 (5V)  |
+| RX  | PIN 8 (UART TX)  |
+| TX  | PIN 10 (UART RX) |
+| GND | PIN 6 (GND) |
+
+If you're using the pushbutton, here are the connections
   
-    | Pushbutton  | Raspberry Pi |
-    | ----------- | ------------ |
-    |    PIN 1    |    PIN 40    |
-    |    PIN 2    |    PIN 39    |
- * Connect the Pi to a power source after flashing an OS into the SD card
+| Pushbutton  | Raspberry Pi |
+| ----------- | ------------ |
+|    PIN 1    |    PIN 40    |
+|    PIN 2    |    PIN 39    |
+
+Connect the Pi to a power source after flashing an OS into the SD card
 ### Installation Instructions
 If you've got this far, then this might just be a walk in the park. Just follow these instructions step by step to set up your device.
 

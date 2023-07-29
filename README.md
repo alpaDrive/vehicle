@@ -113,10 +113,11 @@ Before you jump to that, try to debug by using the scripts available in the `__t
 #### Enabling auto start on boot
 In a nutshell, you're going to create a systemd service for this software and run it on boot. One factor to consider here is that the Raspberry Pi should be on some network all the time. The easiest way to do this is to get some USB SIM card adapter & leave it plugged in. Here is what you have to do once you have a consistent networking solution:
 
-1. Copy over the service unit file from this repository to the `/etc/systemd/system/` directory.
+1. Copy over the service unit file from this repository to the `/etc/systemd/system/` directory, the execution script to `/usr/bin/` directory & grant permissions to the script.
 
     ```bash
     $ sudo cp alpadrive.service /etc/systemd/system/alpadrive.service
+    $ sudo cp alpadrive.sh /usr/bin/alpadrive.sh && sudo chmod +x /usr/bin/alpadrive.sh
     ```
 
 2. Reload the systemd daemon for changes to take effect

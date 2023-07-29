@@ -4,9 +4,8 @@ from utils import auth, configs, vehicle, gps, banner, qr
 from datetime import datetime, timedelta
 
 connection = obd.OBD('/dev/ttyUSB0')
-fuel = vehicle.Fuel(50)
 GPIO.setmode(GPIO.BCM)
-button_pin = 21
+button_pin = configs.BUTTON
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 def register():
@@ -52,7 +51,7 @@ async def send_messages():
                 GPIO.cleanup()
                 os.system("sudo shutdown -h now")
                 quit()
-            stats = vehicle.get_stats(connection, fuel)
+            stats = vehicle.get_stats(connection)
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
             await asyncio.sleep(0.2)
 

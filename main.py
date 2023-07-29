@@ -17,6 +17,13 @@ def power_check():
 def register():
     company = input("Enter the brand/make of this car >> ")
     model = input("Enter the model/name of this car >> ")
+    encrypt = False
+    should_encrypt = input("Do you want to have encrypted credentials in this device? (y/Y) >> ")
+    if should_encrypt.lower() == 'y':
+        print("Encryption will be enabled. You will be prompted to enter a keyring password later on.")
+        encrypt = True
+    else:
+        print("Encryption will stay disabled.")
     payload = {
         "company": company,
         "model": model
@@ -31,7 +38,7 @@ def register():
         initial: True
     }))
     print("\nOpen the mobile app & scan this QR code to pair. This is a one time use code. If you want to share this vehicle, use the share option in the app instead.")
-    auth.set_creds(creds)
+    auth.set_creds(creds, encrypt)
 
 def get_message(message, vid, mode='broadcast', conn_id="", status="success", attachments=[]):
         # Create message in standard format

@@ -1,4 +1,4 @@
-import asyncio, websockets, requests, json, obd, urllib, serial, os
+import asyncio, websockets, requests, json, obd, urllib, serial, os, threading
 import RPi.GPIO as GPIO
 from utils import auth, configs, vehicle, gps, banner, qr
 from datetime import datetime, timedelta
@@ -8,6 +8,12 @@ GPIO.setmode(GPIO.BCM)
 button_pin = configs.BUTTON
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+def power_check():
+    while True:
+        if GPIO.input(button_pin) == GPIO.LOW:
+            GPIO.cleanup()
+            os.system("sudo shutdown -h now")
+        
 def register():
     company = input("Enter the brand/make of this car >> ")
     model = input("Enter the model/name of this car >> ")
@@ -47,10 +53,6 @@ async def send_messages():
     async with websockets.connect(uri) as websocket:
         print(f'{datetime.now().strftime("%H:%M:%S")}: Connected to server!')
         while True:
-            if GPIO.input(button_pin) == GPIO.LOW:
-                GPIO.cleanup()
-                os.system("sudo shutdown -h now")
-                quit()
             stats = vehicle.get_stats(connection)
             await websocket.send(json.dumps(get_message(stats, vehicle_id)))
             await asyncio.sleep(0.2)
@@ -64,7 +66,9 @@ if not auth.is_authenticated():
     except KeyboardInterrupt:
         print("Okay, we'll do this later. But remember not to enable 'alpadrive.service' before running this once more!")
     quit()
-    
+
+button_thread = threading.Thread(target=power_check, daemon=True)
+button_thread.start()
 # wait 2 minutes for GPS fix
 end_time = datetime.now() + timedelta(minutes=2)
 print(f'{datetime.now().strftime("%H:%M:%S")}: Wating for GPS signal...')

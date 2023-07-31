@@ -95,7 +95,13 @@ The first thing that you have to do is to set up and test run the software to se
 3. Install all the required modules
 
     ```bash
-    $ pip install -r requirements.txt
+    $ sudo pip3 install -r requirements.txt # make sure to run it as root
+    ```
+    
+    Now, test whether all the imports are working fine.
+
+    ```bash
+    $ sudo __tests__/check.py # again run as root
     ```
 
 4. Run the script as root from the command line itself after connecting the OBD adapter to a car.

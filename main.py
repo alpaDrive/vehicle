@@ -27,8 +27,8 @@ def register():
     creds = json.loads(response.content)["id"]["$oid"]
     print("\nRegistration successful! Your one time use pairing code is displayed below...\n")
     qr.print_qr(json.dumps({
-        vid: creds,
-        initial: True
+        'vid': creds,
+        'initial': True
     }))
     print("\nOpen the mobile app & scan this QR code to pair. This is a one time use code. If you want to share this vehicle, use the share option in the app instead.")
     auth.set_creds(creds)

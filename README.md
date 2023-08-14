@@ -89,25 +89,25 @@ The first thing that you have to do is to set up and test run the software to se
 2. Clone this repository into the Pi and change the working directory
 
     ```bash
-    $ git clone https://github.com/alpaDrive/vehicle.git
-    $ cd vehicle/
+    git clone https://github.com/alpaDrive/vehicle.git
+    cd vehicle/
     ```
 3. Install all the required modules
 
     ```bash
-    $ sudo pip3 install -r requirements.txt # make sure to run it as root
+    sudo pip3 install -r requirements.txt # make sure to run it as root
     ```
     
     Now, test whether all the imports are working fine.
 
     ```bash
-    $ sudo __tests__/check.py # again run as root
+    sudo python3 __tests__/check.py # again run as root
     ```
 
 4. Run the script as root from the command line itself after connecting the OBD adapter to a car.
 
     ```bash
-    $ sudo python3 main.py
+    sudo python3 main.py
     ```
 
 5. Once this is run, you will get a QR code on your terminal. Scan it from the app after signing up to pair this vehicle to your user account. Make sure you do this once and scan the QR before proceeding to enable auto start on boot. This is because if you accidentally enable auto start on boot, then you'll have to repeat the steps all over again.
@@ -122,39 +122,39 @@ In a nutshell, you're going to create a systemd service for this software and ru
 1. Copy over the service unit file from this repository to the `/etc/systemd/system/` directory, the execution script to `/usr/bin/` directory & grant permissions to the script.
 
     ```bash
-    $ sudo cp alpadrive.service /etc/systemd/system/alpadrive.service
-    $ sudo cp alpadrive.sh /usr/bin/alpadrive.sh && sudo chmod +x /usr/bin/alpadrive.sh
+    sudo cp alpadrive.service /etc/systemd/system/alpadrive.service
+    sudo cp alpadrive.sh /usr/bin/alpadrive.sh && sudo chmod +x /usr/bin/alpadrive.sh
     ```
 
 2. Reload the systemd daemon for changes to take effect
 
     ```bash
-    $ sudo systemctl daemon-reload
+    sudo systemctl daemon-reload
     ```
 
 3. Enable the service to run at boot
 
     ```bash
-    $ sudo systemctl enable alpadrive.service
+    sudo systemctl enable alpadrive.service
     ```
 
 4. Start the service and check whether it runs without crashing. This should print an `active(running)` status onto the console.
 
     ```bash
-    $ sudo systemctl start alpadrive.service
-    $ sudo systemctl status alpadrive.service
+    sudo systemctl start alpadrive.service
+    sudo systemctl status alpadrive.service
     ```
 
 5. Once this is done, you're almost ready to go! Connect the OBD adapter to the car and reboot the Pi...
 
     ```
-    $ sudo reboot
+    sudo reboot
     ```
 
 6. Once it boots up, log back in again and check the status of the service
 
     ```bash
-    $ sudo systemctl status alpadrive.service
+    sudo systemctl status alpadrive.service
     ```
 
     If it's running successfully, then congrats! You can now open your mobile app, pair using the QR code and view the status of your car! You can now disonnect SSH/display & leave the device in your car. Just make sure the power source is stable & doesn't go out. As long as the device stays powered, all features will be available to you. Happy alpaDriving!

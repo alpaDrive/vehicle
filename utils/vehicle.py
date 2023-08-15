@@ -102,7 +102,7 @@ def get_stat(connection, command):
     except:
         return 0
 
-def get_stats(connection, fuel):
+def get_stats(connection):
     rpm = get_stat(connection, obd.commands.RPM)
     speed = get_stat(connection, obd.commands.SPEED)
     temperature = get_stat(connection, obd.commands.COOLANT_TEMP)

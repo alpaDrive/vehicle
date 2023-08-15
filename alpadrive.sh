@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd /home/pi/alpaDrive
+cd /home/$USER/vehicle
 sudo python3 main.py

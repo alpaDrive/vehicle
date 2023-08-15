@@ -1,5 +1,5 @@
 try:
-    import obd, pynmea2, qrcode, pyserial, requests, websockets, qrcode
+    import obd, pynmea2, qrcode, serial, requests, websockets, qrcode
     print("You're good to go! All modules have been installed and appear to be working fine...")
 except Exception as e:
     print("Some modules couldn't be imported. This is what the Python interpreter has to say...\n")

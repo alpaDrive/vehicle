@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/alpadrive.sh
-WorkingDirectory=/home/pi/alpaDrive
+WorkingDirectory=/home/pi/vehicle
 User=root
 Group=root
 
